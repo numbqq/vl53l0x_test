@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
 
 /*
  *  IOCTL register data structs
