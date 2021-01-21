@@ -14,6 +14,7 @@
 #define MODE_OFFCALIB	2
 #define MODE_HELP		3
 #define MODE_PARAMETER  6
+#define MODE_TEST		99
 
 
 //******************************** IOCTL definitions
@@ -61,6 +62,7 @@ static void help(void)
 		" -h for usage\n"
 		" -c for crosstalk calibration\n"
 		" -o for offset calibration\n"
+		" -t for factory test\n"
 		" default for ranging\n"
 		);
 	exit(1);
@@ -76,6 +78,7 @@ int main(int argc, char *argv[])
 	int mode = MODE_RANGE;
 	unsigned int targetDistance=0;
 	int i = 0;
+	int count = 0;
 
 	/* handle (optional) flags first */
 	while (1+flags < argc && argv[1+flags][0] == '-') {
@@ -83,6 +86,7 @@ int main(int argc, char *argv[])
 		case 'c': mode= MODE_XTAKCALIB; break;
 		case 'h': mode= MODE_HELP; break;
 		case 'o': mode = MODE_OFFCALIB; break;
+		case 't': mode = MODE_TEST; break;
 		default:
 			fprintf(stderr, "Error: Unsupported option "
 				"\"%s\"!\n", argv[1+flags]);
@@ -214,11 +218,19 @@ int main(int argc, char *argv[])
 	// get data testing
 	while (1)
 	{
-		usleep(30 *1000); /*100ms*/
+		usleep(30 *1000); /*30ms*/
 		// to get all range data
 		ioctl(fd, VL53L0X_IOCTL_GETDATAS,&range_datas);
 		fprintf(stderr," VL53L0 Range Data:%d, error status:0x%x, signalRate_mcps:%d, Amb Rate_mcps:%d\n",
 				range_datas.RangeMilliMeter, range_datas.RangeStatus, range_datas.SignalRateRtnMegaCps, range_datas.AmbientRateRtnMegaCps);
+
+		if (MODE_TEST == mode)
+		{
+			// time 3s
+			count++;
+			if (100 == count)
+				break;
+		}
 	}
 	close(fd);
 	return 0;
